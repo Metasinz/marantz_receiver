@@ -1,5 +1,5 @@
 """
-Commands and operators used by NAD.
+Commands and operators used by Marantz.
 
 CMDS[domain][function]
 """
