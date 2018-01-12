@@ -9,7 +9,7 @@ For more information see the official documentation
 
 Usage:
 ```
-receiver = NADReceiver(serial_port)  # e.g. /dev/ttyUSB0
+receiver = MarantzReceiver(serial_port)  # e.g. /dev/ttyUSB0
 
 receiver.main_volume(':', '1')  #  will increase volume with 1 and return new value
 receiver.main_volume(':', '2')  #  will decrease volume with 1 and return new value
