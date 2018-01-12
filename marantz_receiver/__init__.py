@@ -54,13 +54,12 @@ class MarantzReceiver(object):
 
         self.ser.write(''.join(['@', cmd, '\r']).encode('utf-8'))
 
-        self.ser.read(1)  # Marantz uses the prefix @ and the suffix \r.
+        # Marantz uses the prefix @ and the suffix \r.
         # With this we read the first \r and skip it
         msg = self.ser.read_until(bytes('\r'.encode()))
-        print ('MSG: '.join(msg))
         self.lock.release()
 
-        return msg.decode().strip().split(':')[2]
+        return msg.decode().strip().split(':')[1]
         # b'AMT:0\r will return 0
 
     def main_mute(self, operator, value=None):
@@ -85,7 +84,7 @@ class MarantzReceiver(object):
 
         Returns int
         """
-        return int(self.exec_command('main', 'source', operator, value))
+        return self.exec_command('main', 'source', operator, value)
 
 if __name__ == "__main__":
 
@@ -93,4 +92,4 @@ if __name__ == "__main__":
 
 	print ("Started")
 
-    print mr.main_volume(':', '?')
+	print (mr.main_power(':', '3'))
