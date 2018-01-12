@@ -22,7 +22,7 @@ CMDS = {
                 {'cmd': 'SRC',
                  'supported_operators': [':']
                  },
-            'status':
+            'autostatus':
                 {'cmd': 'AST',
                  'supported_operators': [':']
                  }

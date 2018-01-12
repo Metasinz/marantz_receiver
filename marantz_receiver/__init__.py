@@ -52,13 +52,14 @@ class MarantzReceiver(object):
         self.ser.reset_output_buffer()
         self.lock.acquire()
 
-        self.ser.write(''.join(['@', cmd, '\r']).encode('utf-8'))
+        final_command = ''.join(['@', cmd, '\r']).encode('utf-8')
+        self.ser.write(final_command)
 
         # Marantz uses the prefix @ and the suffix \r.
         # With this we read the first \r and skip it
         msg = self.ser.read_until(bytes('\r'.encode()))
         self.lock.release()
-
+        print (msg.decode())
         return msg.decode().strip().split(':')[1]
         # b'AMT:0\r will return 0
 
@@ -86,10 +87,10 @@ class MarantzReceiver(object):
         """
         return self.exec_command('main', 'source', operator, value)
 
-if __name__ == "__main__":
+    def main_autostatus (self, operator, value=None):
+        """
+        Execute autostatus
 
-	mr = MarantzReceiver('/dev/ttyS0')
-
-	print ("Started")
-
-	print (mr.main_power(':', '3'))
+        Returns int
+        """
+        return int(self.exec_command('main', 'autostatus', operator, value))
