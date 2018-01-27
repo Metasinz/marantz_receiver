@@ -39,7 +39,7 @@ class MarantzReceiver(object):
             if value is None:
                 raise ValueError('No value provided')
             else:
-                cmd = ''.join(raw_command, operator, str('?')])
+                cmd = ''.join([raw_command, operator, str(value)])
 
         else:
             raise ValueError('Invalid operator provided %s' % operator)
