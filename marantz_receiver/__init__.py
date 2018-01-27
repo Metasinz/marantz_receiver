@@ -2,7 +2,7 @@
 Marantz has an RS232 interface to control the receiver.
 
 Not all receivers have all functions.
-Functions can be found on the
+Functions can be found on in the xls file within this repository
 """
 
 import codecs
@@ -32,19 +32,15 @@ class MarantzReceiver(object):
     def exec_command(self, domain, function, operator, value=None):
         """
         Write a command to the receiver and read the value it returns.
-
         The receiver will always return a value, also when setting a value.
         """
         raw_command = CMDS[domain][function]['cmd']
         if operator in CMDS[domain][function]['supported_operators']:
-            if operator is ':' and value is None:
+            if value is None:
                 raise ValueError('No value provided')
-
-            if value is '?':
-                cmd = ''.join([CMDS[domain][function]['cmd'], operator, str('?')])
             else:
-                cmd = ''.join(
-                    [CMDS[domain][function]['cmd'], operator, str(value)])
+                cmd = ''.join(raw_command, operator, str('?')])
+
         else:
             raise ValueError('Invalid operator provided %s' % operator)
 
@@ -55,19 +51,24 @@ class MarantzReceiver(object):
         self.ser.reset_output_buffer()
         self.lock.acquire()
 
+        # Marantz uses the prefix @ and the suffix \r, so add those to the above cmd.
         final_command = ''.join(['@', cmd, '\r']).encode('utf-8')
-        _LOGGER.info ('Send Command %s',final_command)
+        _LOGGER.debug ('Send Command %s',final_command)
+
         self.ser.write(final_command)
 
-        # Marantz uses the prefix @ and the suffix \r.
         msg = self.ser.read_until(bytes('\r'.encode()))
         self.lock.release()
-        _LOGGER.info ('Response %s', msg.decode())
+
+        _LOGGER.debug ('Response msg %s', msg.decode())
 
         split_string = msg.decode().strip().split(':')
-        _LOGGER.info("Split String %s", split_string)
-        _LOGGER.info ("Command: %s", raw_command)
+
+        _LOGGER.debug("Decoded split string %s", split_string)
+        _LOGGER.debug ("Original command: %s", raw_command)
+        # Check return value contains the same command value as requested. Sometimes the marantz gets out of sync. Ignore if this is the case
         if split_string[0] != ('@' + raw_command):
+            _LOGGER.debug ("Send & Response command values dont match %s != %s - Ignoring returned value", split_string[0], '@' + raw_command )
             return None
         else:
              return split_string[1]
@@ -84,7 +85,6 @@ class MarantzReceiver(object):
     def main_volume(self, operator, value=None):
         """
         Execute Main.Volume.
-
         Returns int
         """
         vol_result = self.exec_command('main', 'volume', operator, value)
@@ -92,21 +92,22 @@ class MarantzReceiver(object):
             return int(self.exec_command('main', 'volume', operator, value))
 
     def main_source(self, operator, value=None):
-        """
-        Execute Main.Source.
-
-        Returns int
-        """
+        """Execute Main.Source."""
         result = self.exec_command('main', 'source', operator, value)
+        """
+        The receiver often returns the source value twice. If so take the
+        second value as the source, otherwise return original
+        """
         if result != None and len(result) == 2:
-            _LOGGER.info("Source Result: %s", result[1])
+            _LOGGER.debug("Source Result: %s", result[1])
             return result[1]
         else:
             return result
 
     def main_autostatus (self, operator, value=None):
         """
-        Execute autostatus
+        Execute autostatus.
+        Not currently used but will allow two-way communications in future
 
         Returns int
         """
