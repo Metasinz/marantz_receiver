@@ -14,8 +14,8 @@ import threading
 import telnetlib
 import logging
 
-DEFAULT_TIMEOUT = 1
-DEFAULT_WRITE_TIMEOUT = 1
+DEFAULT_TIMEOUT = 0.5
+DEFAULT_WRITE_TIMEOUT = 0.5
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ class MarantzReceiver(object):
         """
         vol_result = self.exec_command('main', 'volume', operator, value)
         if vol_result != None:
-            return int(self.exec_command('main', 'volume', operator, value))
+            return int(vol_result)
 
     def main_source(self, operator, value=None):
         """Execute Main.Source."""

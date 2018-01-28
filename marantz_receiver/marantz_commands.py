@@ -2,6 +2,10 @@
 Commands and operators used by Marantz.
 
 CMDS[domain][function]
+
+Majority of Marantz commands use ':' as operator although there are also some
+multi-zone commands that use '='
+
 """
 CMDS = {
     'main':
