@@ -4,12 +4,17 @@ Marantz has an RS232 interface to control the receiver.
 Not all receivers have all functions.
 Functions can be found on in the xls file within this repository
 """
+# import sys
+
+# for p in sys.path:
+#     print(p)
+
 
 import codecs
 import socket
-from time import sleep
-from marantz_receiver.marantz_commands import CMDS
-import serial  # pylint: disable=import-error
+from time import sleep 
+from marantz_receiver.marantz_commands import CMDS # pylint: disable=import-error
+import serial  
 import threading
 import telnetlib
 import logging
@@ -17,7 +22,7 @@ import logging
 DEFAULT_TIMEOUT = 0.5
 DEFAULT_WRITE_TIMEOUT = 0.5
 
-_LOGGER = logging.getLogger(__name__)
+#logging.basicConfig(filename = 'debug.log',level=logging.DEBUG, format='%(asctime)s:%(levelname)s:%(message)s') #comment out for no file and default Level WARNING
 
 class MarantzReceiver(object):
     """Marantz receiver."""
@@ -53,22 +58,22 @@ class MarantzReceiver(object):
 
         # Marantz uses the prefix @ and the suffix \r, so add those to the above cmd.
         final_command = ''.join(['@', cmd, '\r']).encode('utf-8')
-        _LOGGER.debug ('Send Command %s',final_command)
+        logging.debug ('Send Command %s',final_command)
 
         self.ser.write(final_command)
 
         msg = self.ser.read_until(bytes('\r'.encode()))
         self.lock.release()
 
-        _LOGGER.debug ('Response msg %s', msg.decode())
+        logging.debug ('Response from read msg %s', msg.decode())
 
         split_string = msg.decode().strip().split(':')
 
-        _LOGGER.debug("Decoded split string %s", split_string)
-        _LOGGER.debug ("Original command: %s", raw_command)
+        logging.debug("Decoded split string %s", split_string)
+        logging.debug ("Original command: %s\n", raw_command)
         # Check return value contains the same command value as requested. Sometimes the marantz gets out of sync. Ignore if this is the case
         if split_string[0] != ('@' + raw_command):
-            _LOGGER.debug ("Send & Response command values dont match %s != %s - Ignoring returned value", split_string[0], '@' + raw_command )
+            logging.debug ("Send & Response command values dont match %s != %s - Ignoring returned value", split_string[0], '@' + raw_command )
             return None
         else:
              return split_string[1]
@@ -85,11 +90,11 @@ class MarantzReceiver(object):
     def main_volume(self, operator, value=None):
         """
         Execute Main.Volume.
-        Returns int
+        Returns string
         """
         vol_result = self.exec_command('main', 'volume', operator, value)
         if vol_result != None:
-            return int(vol_result)
+            return vol_result
 
     def main_source(self, operator, value=None):
         """Execute Main.Source."""
@@ -99,7 +104,7 @@ class MarantzReceiver(object):
         second value as the source, otherwise return original
         """
         if result != None and len(result) == 2:
-            _LOGGER.debug("Source Result: %s", result[1])
+            logging.debug("Source Result: %s", result[1])
             return result[1]
         else:
             return result
